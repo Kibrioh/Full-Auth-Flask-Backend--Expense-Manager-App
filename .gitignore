@@ -3,3 +3,7 @@ __pycache__/
 .env
 .venv/
 instance/
+cookies*.txt
+jar.txt
+*.db
+.env

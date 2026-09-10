@@ -1,7 +1,8 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import MetaData
 from datetime import datetime
-
+from flask_bcrypt import Bcrypt
+from sqlalchemy.ext.hybrid import hybrid_property
 
 
 metadata = MetaData(naming_convention={
@@ -9,6 +10,7 @@ metadata = MetaData(naming_convention={
 })
 
 db = SQLAlchemy(metadata=metadata)
+bcrypt = Bcrypt()
 
 
 class User(db.Model):
@@ -29,6 +31,30 @@ class User(db.Model):
         passive_deletes=True,
     )
 
+    @hybrid_property
+    def password_hash(self):
+        # Write-only: never expose the stored hash.
+        raise AttributeError("Password hashes may not be viewed.")
+
+    @password_hash.setter
+    def password_hash(self, plaintext_password):
+        hashed = bcrypt.generate_password_hash(plaintext_password.encode("utf-8"))
+        self._password_hash = hashed.decode("utf-8")
+
+    def authenticate(self, plaintext_password):
+        """Return True if the plaintext matches the stored hash."""
+        return bcrypt.check_password_hash(
+            self._password_hash, plaintext_password.encode("utf-8")
+        )
+
+    def to_dict(self):
+        """Safe user representation for API responses (no password)."""
+        return {
+            "id": self.id,
+            "username": self.username,
+            "email": self.email,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+        }
 
     def __repr__(self):
         return f"<User {self.username}>"

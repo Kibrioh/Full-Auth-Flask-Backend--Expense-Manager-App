@@ -8,10 +8,12 @@ with app.app_context():
     Resource.query.delete()
     User.query.delete()
 
-    user1 = User(username="Alice", email="alice@gmail.com", password_hash="12345678")
-    user2 = User(username="Bob", email="bob@gmail.com", password_hash="12345678")
-    user3 = User(username="Carol", email="carol@gmail.com", password_hash="12345678")
-
+    user1 = User(username="Alice", email="alice@gmail.com")
+    user2 = User(username="Bob", email="bob@gmail.com")
+    user3 = User(username="Carol", email="carol@gmail.com")
+    user1.password_hash = "12345678"
+    user2.password_hash = "12345678"
+    user3.password_hash = "12345678"
     resources = (
         Resource(
             user=user1,
